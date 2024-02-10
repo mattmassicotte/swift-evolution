@@ -9,7 +9,7 @@
 
 ## Introduction
 
-This proposal changes how isolation inheritance works for isolated parameters of non-Sendable types. It makes the isolation inheritance rules more uniform while also making a specific concurrency pattern less-restrictive.
+This proposal changes how isolation inheritance works for isolated parameters. It makes the isolation inheritance rules more uniform while also making a specific concurrency pattern less-restrictive.
 
 ## Table of Contents
 
@@ -51,7 +51,7 @@ The actor-isolated version works, but the static isolation is required only to g
 
 ## Proposed solution
 
-This proposal changes the inheritance semantics for isolated parameters to match actor inheritance.
+This proposal changes the inheritance semantics for isolated parameters. An isolated parameter should always be inherited, even when used with an actor type.
 
 ## Detailed design
 
@@ -88,13 +88,13 @@ class NonSendableType {
 }
 ``` 
 
-The proposed solution is to make this capture implicit when also capturing `self`, unless self is an actor type.
+The proposed solution is to make this capture uncondtionally implicit, even in the case of an actor-type capturing self.
 
 ## Source compatibility
 
 The change proposed here is loosening a restriction. This may have the effect of making currently-invalid code valid. But it will not make any currently-valid code invalid.
 
-It is also worth noting that this does not affect the isolation semantics for actor-isolated types that make use of isolated parameters. It is currently impossible to access self in these cases, and even with this new inheritance rule that remains true.
+It is worth noting that this does not affect the isolation semantics for actor-isolated types that make use of isolated parameters. It is currently impossible to access self in these cases, and even with this new inheritance rule that remains true.
 
 ```swift
 actor MyActor {
