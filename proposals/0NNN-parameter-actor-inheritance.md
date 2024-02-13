@@ -17,16 +17,17 @@ This proposal changes how isolation inheritance works for isolated parameters. I
 * [Motivation](#motivation)
 * [Proposed solution](#proposed-solution)
 * [Detailed design](#detailed-design)
+    + [Inheritance Change](#inheritance-hange)
+    + [Inheritance Opt-Out](#inheritance-opt-out)
 * [Source compatibility](#source-compatibility)
 * [ABI compatibility](#abi-compatibility)
 * [Implications on adoption](#implications-on-adoption)
-* [Future directions](#future-directions)
 * [Alternatives considered](#alternatives-considered)
 * [Acknowledgments](#acknowledgments)
 
 ## Motivation
 
-Right now, there is a difference in how isolation inheritance works for isolated parameters vs actor isolation. This makes it much more challenging to build intuition around how this inheritance works. But, it also makes some kinds of concurrency patterns impossible to use without being overly restrictive.
+Right now, there is a difference in how isolation inheritance works for isolated parameters vs actor isolation. This makes it much more challenging to build intuition around how inheritance works. But, it also makes some kinds of concurrency patterns impossible to use without being overly restrictive.
 
 Here's an example of the difference:
 
@@ -54,6 +55,8 @@ The actor-isolated version works, but the static isolation is required only to g
 This proposal changes the inheritance semantics for isolated parameters. An isolated parameter should always be inherited, even when used with an actor type.
 
 ## Detailed design
+
+### Inheritance Change
 
 The inheritance rules for `Task` depend on a number of factors. When statically-isolated, isolation is unconditionally inherited. When isolated to an actor, the isolation depends on the actor value being captured explicitly. In practice, this form is a very natural arrangement. In order to access actor-protected state (via `self`), you have to capture self.
 
@@ -90,9 +93,48 @@ class NonSendableType {
 
 The proposed solution is to make this capture uncondtionally implicit, even in the case of an actor-type capturing self.
 
+### Inheritance Opt-Out
+
+This proposal makes inheritance unconditional. This makes it a little awkward to set up a non-isolated `Task` that still inherits priority. Here's what would be required:
+
+```swift
+actor MyActor {
+    func inherit() {
+        // do isolated work
+
+        Task {
+          // now isolated to self
+          await nonisolatedfunction()
+        }
+    }
+
+    nonisolated func nonisolatedfunction() {
+        // have to put non-isolated work here
+    }
+}
+````
+
+The desired isolation has to be separated from the point where it is needed. The proposed solution is to allow the use of the `nonisolated` keyword in closure expressions to explicitly opt-out of any isolation inheritance, without needing to introduce a non-isolated function.
+
+```swift
+actor MyActor {
+    func inherit() {
+        // do isolated work
+
+        Task { nonisolated in
+          // non-isolated work here
+        }
+    }
+}
+````
+
+To support this, the grammar for a closure expression has to be modifed.
+
+closure-signature → nonisolated? capture-list? closure-parameter-clause async? throws? function-result? in
+
 ## Source compatibility
 
-The change proposed here is loosening a restriction. This may have the effect of making currently-invalid code valid. But it will not make any currently-valid code invalid.
+The change proposed here is loosening a restriction and additive language grammar. This may have the effect of making currently-invalid code valid. But it will not make any currently-valid code invalid.
 
 It is worth noting that this does not affect the isolation semantics for actor-isolated types that make use of isolated parameters. It is currently impossible to access self in these cases, and even with this new inheritance rule that remains true.
 
@@ -130,24 +172,6 @@ This proposal should have no impact on ABI compatibility.
 ## Implications on adoption
 
 This feature can be freely adopted and un-adopted in source code with no deployment constraints and without affecting source or ABI compatibility.
-
-## Future directions
-
-There is an interesting problem that comes up for actor types that use isolated parameters.
-
-```swift
-actor MyActor {
-    var mutableState = 0
-
-    func isolatedParameter(_ actor: isolated any Actor) {
-        Task {
-            // isolated to what here?
-        }
-    }
-}
-```
-
-Today, this appears to be always be non-isolated. The change made in https://github.com/apple/swift/pull/71143 will apply, so explicit inheritance to `actor` could still be possible. It might be worth considering if the implicit isolation to `actor`, as is proposed here, is more appropriate in this situation.
 
 ## Alternatives considered
 
