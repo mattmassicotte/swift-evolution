@@ -158,7 +158,7 @@ Task(executorPreference: executor) {
 ```
 
 In a way, one should think of the `SerialExecutor` of the actor and `TaskExecutor` both being tracked and providing different semantics. 
-The `SerialExecutor` guarntees mutual exclusion, and the `TaskExecutor` provides a source of threads.
+The `SerialExecutor` guarantees mutual exclusion, and the `TaskExecutor` provides a source of threads.
 
 ## Detailed design
 
@@ -273,7 +273,7 @@ Task(executorPreference: specialExecutor) {
       return 12 
     }
     group.addTask(executorPreference: differentExecutor) {
-      // using 'globalConcurrentExecutor', overriden preference
+      // using 'differentExecutor', overriden preference
       return 42 
     }
     group.addTask(executorPreference: nil) {
@@ -662,7 +662,7 @@ This way we won't be blocking threads inside the shared pool, and not risking th
 
 We can call `callRead` from inside `callBulk` and avoid un-necessary context switching as the same thread servicing the IO operation may be used for those asynchronous functions -- and no actual context switch may need to be performed when `callBulk` calls into `callRead` either.
 
-For end-users of this library the API they don't need to worry about any of this, but the author of such library is in full control over where execution will happen -- be it using task executor preference, or custom actor executors.
+For end-users of this library API don't need to worry about any of this, but the author of such library is in full control over where execution will happen -- be it using task executor preference, or custom actor executors.
 
 This works also the other way around: when we're using a library and notice that it is doing blocking things and we'd rather separate it out onto a different executor. It may even have declared asynchronous methods -- but still is taking too long to yield the thread for some reason, causing issues to the shared pool.
 
