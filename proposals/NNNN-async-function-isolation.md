@@ -244,14 +244,14 @@ func useAsValue(_ ns: NotSendable) async { ... }
 @MainActor let global: NotSendable = .init()
 
 @MainActor
-func callSendableClosure(closure: @Sendable (NotSendable) async -> Void) {
+func callSendableClosure(_ closure: @Sendable (NotSendable) async -> Void) async {
   let ns = NotSendable()
   await closure(ns) // okay
 
   await closure(global) // error
 }
 
-callSendableClosure(useAsValue)
+await callSendableClosure(useAsValue)
 ```
 
 In the above code, the call to `useAsValue` runs off of the main actor.
