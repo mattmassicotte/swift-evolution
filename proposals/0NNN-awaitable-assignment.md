@@ -11,7 +11,7 @@
 
 Swift provides a lot of flexibility around effect handling.
 Both the `try` and `await` keywords can appear, often optionally, in a variety of positions within statements and expressions.
-They are only actually are required to appear once, at the outer-most effectful element.
+They are only actually required to appear once, at the outer-most effectful element.
 
 However, there are two exceptions to this rule:
 property assignment and subscript setters that need to cross isolation domains.
@@ -44,7 +44,7 @@ class AsyncTest {
 }
 ```
 
-Having the `await` keyword preceeding the entire statement is one of the arrangment explicitly supported by [SE-0296](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0296-async-await.md).
+Having the `await` keyword preceding the entire statement is one of the arrangement explicitly supported by [SE-0296](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0296-async-await.md).
 However, this particular structure only works when the assignment does not involve crossing isolation domains.
 If we modify the isolation of this type, perhaps even implicitly via default isolation,
 the code no longer compiles.
