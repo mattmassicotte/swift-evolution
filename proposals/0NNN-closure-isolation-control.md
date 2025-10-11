@@ -1,7 +1,7 @@
 # Closure isolation control
 
 * Proposal: [SE-NNNN](nnnn-closure-isolation.md)
-* Authors: [Sophia Poirier](https://github.com/sophiapoirier), [Matt Massicotte](https://github.com/mattmassicotte), [Konrad Malawski](https://github.com/ktoso), [John McCall](https://github.com/rjmccall)
+* Authors: [Sophia Poirier](https://github.com/sophiapoirier), [Matt Massicotte](https://github.com/mattmassicotte), [John McCall](https://github.com/rjmccall)
 * Review Manager: TBD
 * Status: **Awaiting review**
 * Implementation: On `main` gated behind `-enable-experimental-feature ClosureIsolation`
