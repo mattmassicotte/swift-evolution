@@ -20,6 +20,7 @@ This proposal removes these exceptions, making the use of `await` more uniform a
 ## Motivation
 
 ### Current Behavior
+
 Using property assignment as a means of publishing a result is quite common.
 But, understanding the relationship between actually producing that result asynchronously
 and using the `await` keyword is surpringly subtle.
@@ -116,7 +117,7 @@ And third, it reinforces a pattern that isn't necessary for regular function cal
 ### Transactionality
 
 An important consideration here is accidentally exposing intermediate states.
-Properties often directly hold isolated state,
+Properties often directly hold isolated state
 and assignment makes introducing non-transactional mutations easier.
 
 Consider this code:
@@ -143,8 +144,8 @@ Actor-isolated property 'a' can not be mutated from a nonisolated context
 
 The property cannot be mutated directly, but a trivial wrapper function can?
 Why is this?
-A programmer enountering this would have to do considerable research to learn
-this is actually about a potentially problematic pattern and not just a syntatic limitation.
+A programmer encountering this would have to do considerable research to learn
+this is actually about a potentially problematic pattern and not just a syntactic limitation.
 Worse, it could foster confusion around the concept of isolation,
 because it strongly implies that mutation specifically is special in some way.
 
@@ -157,7 +158,7 @@ Swift a number of high-profile state observation libraries that use properties a
 
 But, perhaps most importantly,
 understanding the implications of suspensions points on transactional state mutation is an essential skill.
-This is a phenomonon that a Swift programmer will be exposed to,
+This is a phenomenon that a Swift programmer will be exposed to,
 one that requires they develop a sense of how to recognize and deal with.
 Building APIs that encourage logical races isn't a good thing.
 But, disallowing this one particular construct does not further develop recognition,
@@ -165,7 +166,7 @@ thought it might indirectly encourage some limited mitigations.
 
 Ultimately, thinking in terms of synchronous transactions while writing asynchronous code is unavoidable.
 Encouraging awareness of the problem is essential,
-but in order to acheive that goal, the programmer must understand the problem first.
+but in order to achieve that goal, the programmer must understand the problem first.
 Allowing isolated assignment will help build that awareness in a way that remains
 consistent with all other uses of the `await` keyword.
 
