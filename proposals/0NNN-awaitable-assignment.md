@@ -19,6 +19,7 @@ This proposal removes these exceptions, making the use of `await` more uniform a
 
 ## Motivation
 
+### Current Behavior
 Using property assignment as a means of publishing a result is quite common.
 But, understanding the relationship between actually producing that result asynchronously
 and using the `await` keyword is surpringly subtle.
@@ -112,6 +113,62 @@ This isn't necessarily a given when working with default isolation control.
 Second, it requires referencing that isolation at all affected call sites.
 And third, it reinforces a pattern that isn't necessary for regular function calls.
 
+### Transactionality
+
+An important consideration here is accidentally exposing intermediate states.
+Properties often directly hold isolated state,
+and assignment makes introducing non-transactional mutations easier.
+
+Consider this code:
+
+```swift
+actor Stateful {
+  var a: Int = 1
+  var b: Int = 2
+}
+
+await stateful.a = stateful.b
+```
+
+The proposed change make logical races even easier,
+because it makes suspensions points less obvious in this situation.
+However, there are three things worth noting about awaiting assignment.
+
+First, diagnostic produced does explain what cannot be done,
+but it does not help to understand **why**.
+
+```
+Actor-isolated property 'a' can not be mutated from a nonisolated context
+```
+
+The property cannot be mutated directly, but a trivial wrapper function can?
+Why is this?
+A programmer enountering this would have to do considerable research to learn
+this is actually about a potentially problematic pattern and not just a syntatic limitation.
+Worse, it could foster confusion around the concept of isolation,
+because it strongly implies that mutation specifically is special in some way.
+
+Second, this is the API that the author of the `Stateful` type has decided to publish.
+Understanding the intention here, what operations may or may not make sense,
+and how much transactionality cannot be known.
+The **visible** interface could be a simple property,
+but the underlying implementation could be quite complicated.
+Swift a number of high-profile state observation libraries that use properties an an interface.
+
+But, perhaps most importantly,
+understanding the implications of suspensions points on transactional state mutation is an essential skill.
+This is a phenomonon that a Swift programmer will be exposed to,
+one that requires they develop a sense of how to recognize and deal with.
+Building APIs that encourage logical races isn't a good thing.
+But, disallowing this one particular construct does not further develop recognition,
+thought it might indirectly encourage some limited mitigations.
+
+Ultimately, thinking in terms of synchronous transactions while writing asynchronous code is unavoidable.
+Encouraging awareness of the problem is essential,
+but in order to acheive that goal, the programmer must understand the problem first.
+Allowing isolated assignment will help build that awareness in a way that remains
+consistent with all other uses of the `await` keyword.
+
 ## Proposed solution
 
 This proposal relaxes the rules around suspensions points for assignment and subscripting,
@@ -139,6 +196,7 @@ class IsolatedTest {
 }
 ```
 
+The changes would apply to all isolated assignments, including for actor types.
 This makes the use of the keyword more uniform and most importantly,
 eliminates a fairly common source of confusion.
 
@@ -152,19 +210,23 @@ is being changed.
 
 ## Source compatibility
 
-*forthcoming*
+This change is purely additive.
+It will not have any impact on existing source.
 
 ## ABI compatibility
 
-*forthcoming*
+This proposal has no ABI impact on existing code.
 
 ## Implications on adoption
 
-*forthcoming*
+This feature can be freely adopted and un-adopted in source
+code with no deployment constraints and without affecting source or ABI
+compatibility.
 
 ## Future directions
 
-*forthcoming*
+The obvious future direction here are the same as is covered in [SE-0310](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0310-effectful-readonly-properties.md).
+That proposal covers the implications of effectful property setters well.
 
 ## Alternatives considered
 
@@ -172,4 +234,4 @@ is being changed.
 
 ## Acknowledgments
 
-*forthcoming*
+John McCall helped clarify the motivation behind the current behavior.
