@@ -142,7 +142,7 @@ but it does not help the programmer to build a mental model around **why**.
 Actor-isolated property 'a' can not be mutated from a nonisolated context
 ```
 
-The property cannot be mutated directly, but a trivial wrapper function can?
+The property cannot be mutated directly, but a trivial wrapper function works?
 Why is this?
 A programmer encountering this would have to do considerable research to learn
 this is actually about a potentially problematic pattern and not just a syntactic limitation.
@@ -154,7 +154,7 @@ Understanding the intention here, what operations may or may not make sense,
 and how much transactionality is appropriate cannot be known.
 The **visible** interface could be a simple property,
 but the underlying implementation could be quite complicated.
-A number of high-profile state observation libraries use properties an an interface,
+A number of high-profile state observation libraries use properties as an interface,
 where direct assignment as a means of publishing changes makes sense.
 Further, it's hard to know what an reasonable solution should be.
 Is a transactional method desirable?
@@ -163,7 +163,7 @@ These is an API design concern.
 But, perhaps most importantly,
 understanding the implications of suspensions points on transactional state mutation is an essential skill.
 This is a phenomenon that a Swift programmer will be exposed to,
-one that requires they develop a sense of how to recognize and deal with.
+one that requires they develop the ability to recognize.
 Building APIs that encourage logical races isn't a good thing.
 But, disallowing this one particular construct does not further develop recognition,
 thought it might indirectly encourage some limited mitigations.
