@@ -23,7 +23,7 @@ This proposal removes these exceptions, making the use of `await` more uniform a
 
 Using property assignment as a means of publishing a result is quite common.
 But, understanding the relationship between actually producing that result asynchronously
-and using the `await` keyword is surpringly subtle.
+and using the `await` keyword is surprisingly subtle.
 
 ```swift
 @concurrent
@@ -46,7 +46,7 @@ class AsyncTest {
 }
 ```
 
-Having the `await` keyword preceeding the entire statement is one of the arrangment explicitly supported by [SE-0296](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0296-async-await.md).
+Having the `await` keyword preceding the entire statement is one of the arrangment explicitly supported by [SE-0296](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0296-async-await.md).
 However, this particular structure only works when the assignment does not involve crossing isolation domains.
 If we modify the isolation of this type, perhaps even implicitly via default isolation,
 the code no longer compiles.
@@ -133,10 +133,10 @@ await stateful.a = stateful.b
 
 The proposed change make logical races even easier,
 because it makes suspensions points less obvious in this situation.
-However, there are three things worth noting about awaiting assignment.
+However, there are three things worth noting here.
 
 First, diagnostic produced does explain what cannot be done,
-but it does not help to understand **why**.
+but it does not help the programmer to build a mental model around **why**.
 
 ```
 Actor-isolated property 'a' can not be mutated from a nonisolated context
@@ -151,10 +151,14 @@ because it strongly implies that mutation specifically is special in some way.
 
 Second, this is the API that the author of the `Stateful` type has decided to publish.
 Understanding the intention here, what operations may or may not make sense,
-and how much transactionality cannot be known.
+and how much transactionality is appropriate cannot be known.
 The **visible** interface could be a simple property,
 but the underlying implementation could be quite complicated.
-Swift a number of high-profile state observation libraries that use properties an an interface.
+A number of high-profile state observation libraries use properties an an interface,
+where direct assignment as a means of publishing changes makes sense.
+Further, it's hard to know what an reasonable solution should be.
+Is a transactional method desirable?
+These is an API design concern.
 
 But, perhaps most importantly,
 understanding the implications of suspensions points on transactional state mutation is an essential skill.
@@ -166,9 +170,9 @@ thought it might indirectly encourage some limited mitigations.
 
 Ultimately, thinking in terms of synchronous transactions while writing asynchronous code is unavoidable.
 Encouraging awareness of the problem is essential,
-but in order to achieve that goal, the programmer must understand the problem first.
-Allowing isolated assignment will help build that awareness in a way that remains
-consistent with all other uses of the `await` keyword.
+but in order to achieve that goal, the programmer must understand the problem.
+Disallowing `await` for this specific situation may help to build this understanding,
+but it does so in a very oblique way that also comes with signifiant downsides.
 
 ## Proposed solution
 
